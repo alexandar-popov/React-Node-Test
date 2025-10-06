@@ -1,9 +1,15 @@
 # Test
 
 1. Display time zone on top bar.
+   > I have added the time zone only in the top/tasks bar. I didn't addit it to the "ClientNavbar" of the client where there is also diplayed a clock. 
+
 2. When create new Employee, display form validation message(under each field) instead of alert if some fields are empty
+   > Added validation message to the create & Edit window. Also fix the handling of email in the edit window.
+
 3. Add client button and modal.
+   > Reuse the existing CreateEmpleyee component which I have renamed to CreateUser
 4. Add client edit feature.
+
 
 ## Required:
  Node.js 18+

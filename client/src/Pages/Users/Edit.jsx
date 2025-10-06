@@ -22,10 +22,15 @@ const Transition = React.forwardRef(function Transition(props, ref) {
   return <Slide direction="down" ref={ref} {...props} />;
 });
 
-const EditModal = ({ open, setOpen }) => {
+const EditModal = ({ open, setOpen, isEmployee }) => {
   /////////////////////////////////////// VARIABLES ///////////////////////////////////////
+  const userType = isEmployee ? "Employee" : "Client";
   const dispatch = useDispatch();
-  const { currentEmployee, isFetching, error } = useSelector((state) => state.user);
+  const { currentEmployee, clients, allClients, isFetching, error } = useSelector((state) => state.user);
+
+  console.log("clisnts", clients);
+  console.log("allClients", allClients);
+
   const initialEmployeeState = {
     firstName: "",
     lastName: "",
@@ -36,6 +41,8 @@ const EditModal = ({ open, setOpen }) => {
 
   /////////////////////////////////////// STATES ///////////////////////////////////////
   const [employeeData, setEmployeeData] = useState(currentEmployee);
+  const [errors, setErrors] = useState({});
+
   /////////////////////////////////////// USE EFFECT ///////////////////////////////////////
   useEffect(() => {
     setEmployeeData(currentEmployee);
@@ -44,6 +51,23 @@ const EditModal = ({ open, setOpen }) => {
   /////////////////////////////////////// FUNCTIONS ///////////////////////////////////////
   const handleSubmit = (e) => {
     e.preventDefault();
+    const { firstName, lastName, username, password, phone, email } = employeeData
+
+    let newErrors = {};
+    if (!firstName) newErrors.firstName = "First name is required";
+    if (!lastName) newErrors.lastName = "Last name is required";
+    if (!username) newErrors.username = "Username is required";
+    if (!password) newErrors.password = "Password is required";
+    if (!phone) newErrors.phone = "Phone number is required";
+
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    // Clear errors and proceed
+    setErrors({});
+
     dispatch(updateUser(currentEmployee._id, employeeData, employeeData?.role));
     setEmployeeData(initialEmployeeState);
     setOpen(false);
@@ -51,6 +75,7 @@ const EditModal = ({ open, setOpen }) => {
 
   const handleInputChange = (field, value) => {
     setEmployeeData((prevFilters) => ({ ...prevFilters, [field]: value }));
+    setErrors((prev) => ({ ...prev, [field]: "" }));
   };
 
   const handleClose = () => {
@@ -68,7 +93,7 @@ const EditModal = ({ open, setOpen }) => {
       maxWidth="sm"
       aria-describedby="alert-dialog-slide-description">
       <DialogTitle className="flex items-center justify-between">
-        <div className="text-sky-400 font-primary">Edit Employee</div>
+        <div className="text-sky-400 font-primary">Edit {userType}</div>
         <div className="cursor-pointer" onClick={handleClose}>
           <PiXLight className="text-[25px]" />
         </div>
@@ -77,7 +102,7 @@ const EditModal = ({ open, setOpen }) => {
         <div className="flex flex-col gap-2 p-3 text-gray-500 font-primary">
           <div className="text-xl flex justify-start items-center gap-2 font-normal">
             <PiNotepad size={23} />
-            <span>Employee Detials</span>
+            <span>{userType} Detials</span>
           </div>
           <Divider />
           <table className="mt-4">
@@ -89,6 +114,8 @@ const EditModal = ({ open, setOpen }) => {
                   fullWidth
                   value={employeeData?.firstName}
                   onChange={(e) => handleInputChange("firstName", e.target.value)}
+                  error={!!errors.firstName}
+                  helperText={errors.firstName}
                 />
               </td>
             </tr>
@@ -100,6 +127,8 @@ const EditModal = ({ open, setOpen }) => {
                   fullWidth
                   value={employeeData?.lastName}
                   onChange={(e) => handleInputChange("lastName", e.target.value)}
+                  error={!!errors.lastName}
+                  helperText={errors.lastName}
                 />
               </td>
             </tr>
@@ -111,7 +140,7 @@ const EditModal = ({ open, setOpen }) => {
                     fullWidth
                     placeholder="Optional"
                     value={employeeData?.email}
-                    onChange={(e) => handleChange('email', e.target.value)}
+                    onChange={(e) => handleInputChange('email', e.target.value)}
                   />
                 </td>
               </tr>
@@ -123,6 +152,8 @@ const EditModal = ({ open, setOpen }) => {
                   fullWidth
                   value={employeeData?.username}
                   onChange={(e) => handleInputChange("username", e.target.value)}
+                  error={!!errors.username}
+                  helperText={errors.username}
                 />
               </td>
             </tr>
@@ -134,6 +165,8 @@ const EditModal = ({ open, setOpen }) => {
                   size="small"
                   value={employeeData?.phone}
                   onChange={(e) => handleInputChange("phone", e.target.value)}
+                  error={!!errors.phone}
+                  helperText={errors.phone}
                   fullWidth
                 />
               </td>
